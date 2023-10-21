@@ -25,6 +25,11 @@ func (app *App) CreateComment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if len(unmarshal.Content) == 0 {
+		utils.HandleError(w, http.StatusBadRequest, fmt.Errorf(`"content" field is missing`))
+		return
+	}
+
 	postID, ok := utils.GetIDFromQueryParams(w, req)
 	if !ok {
 		return

@@ -25,6 +25,11 @@ func (app *App) CreatePost(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if len(unmarshal.Content) == 0 {
+		utils.HandleError(w, http.StatusBadRequest, fmt.Errorf(`"content" field is missing`))
+		return
+	}
+
 	postRepo := &repository.Post{
 		Content: unmarshal.Content,
 		Likes:   unmarshal.Likes,
