@@ -1,6 +1,16 @@
 # Homework 5
 
 
+### curl запросы:
+
+- curl -X POST localhost:9000/post -d '{"content":"hello world!","likes":17}' -i
+- curl -X POST localhost:9000/post/1/comment -d '{"content":"hello!"}' -i
+- curl -X POST localhost:9000/post/1/comment -d '{"content":"hi!"}' -i
+- curl -X GET localhost:9000/post/1 -i
+- curl -X PUT localhost:9000/post -d '{"content":"hello universe!","likes":17,"id":1}' -i
+- curl -X DELETE localhost:9000/post/1 -i
+
+
 ## Задание
 
 * Отрефакторить код дз 3 недели(если необходимо). Применить подходит DI, переписать методы бд на использование интерфейсов
