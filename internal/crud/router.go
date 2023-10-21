@@ -1,6 +1,7 @@
 package crud
 
 import (
+	"homework-3/internal/pkg/repository"
 	"homework-3/internal/pkg/repository/postgresql"
 
 	"github.com/gorilla/mux"
@@ -9,7 +10,7 @@ import (
 // App represents the main application structure.
 type App struct {
 	Router *mux.Router
-	Repo   *postgresql.Repo
+	Repo   repository.Repo
 }
 
 // NewApp creates a new instance of the App type with the provided router and repository.
@@ -28,5 +29,5 @@ func (app *App) initializeRoutes() {
 	app.Router.HandleFunc("/post/{id:[\\S]*}", app.GetPostByID).Methods("GET")
 	app.Router.HandleFunc("/post/{id:[0-9]+}/comment", app.CreateComment).Methods("POST")
 	app.Router.HandleFunc("/post", app.UpdatePost).Methods("PUT")
-	app.Router.HandleFunc("/post/{id:[0-9]+}", app.DeletePostByID).Methods("DELETE")
+	app.Router.HandleFunc("/post/{id:[\\S]*}", app.DeletePostByID).Methods("DELETE")
 }

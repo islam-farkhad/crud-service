@@ -14,11 +14,11 @@ import (
 
 // Repo is a struct representing the PostgreSQL repository for handling Post and Comment entities.
 type Repo struct {
-	db *db.Database
+	db db.DBops
 }
 
 // NewRepo creates a new instance of the PostgreSQL repository.
-func NewRepo(database *db.Database) *Repo {
+func NewRepo(database db.DBops) *Repo {
 	return &Repo{db: database}
 }
 
@@ -62,8 +62,12 @@ func (r *Repo) UpdatePost(ctx context.Context, post *repository.Post) (int64, er
 func (r *Repo) GetPostByID(ctx context.Context, id int64) (*repository.Post, error) {
 	var post repository.Post
 	err := r.db.Get(ctx, &post, "SELECT id, content, likes, created_at FROM posts WHERE id=$1;", id)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil, repository.ErrObjectNotFound
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, repository.ErrObjectNotFound
+		}
+		return nil, err
 	}
 	return &post, nil
 }
