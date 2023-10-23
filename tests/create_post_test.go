@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"homework-3/internal/pkg/repository"
 	"homework-3/internal/utils"
-	"homework-3/tests/app"
 	"homework-3/tests/states"
 	"net/http"
 	"testing"
@@ -18,9 +17,8 @@ import (
 func Test_CreatePost(t *testing.T) {
 	t.Parallel()
 	var (
-		method  = "POST"
-		route   = "/test/post"
-		testApp = app.NewTestApp(database.DB)
+		method = "POST"
+		route  = "/test/post"
 	)
 
 	t.Run("success", func(t *testing.T) {
@@ -38,7 +36,6 @@ func Test_CreatePost(t *testing.T) {
 
 		//assert
 		post := &repository.Post{}
-		fmt.Println(string(rr.Body.Bytes()))
 		err := json.Unmarshal(rr.Body.Bytes(), post)
 		if err != nil {
 			panic(err)
