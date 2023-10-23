@@ -37,7 +37,6 @@ func Test_DeletePost(t *testing.T) {
 		testApp.Router.ServeHTTP(rr, req)
 
 		post := &repository.Post{}
-		fmt.Println(string(rr.Body.Bytes()))
 		err := json.Unmarshal(rr.Body.Bytes(), post)
 		if err != nil {
 			panic(err)
