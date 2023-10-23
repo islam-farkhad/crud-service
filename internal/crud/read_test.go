@@ -43,7 +43,7 @@ func TestGetPostByID(t *testing.T) {
 		// assert
 		require.Equal(t, http.StatusOK, statusCode)
 
-		var response getPostByIDResponse
+		var response GetPostByIDResponse
 		err := json.Unmarshal(result, &response)
 		require.NoError(t, err)
 
