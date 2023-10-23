@@ -16,7 +16,8 @@ type addCommentRequest struct {
 	Content string `json:"content"`
 }
 
-type getPostByIDResponse struct {
+// GetPostByIDResponse struct for HandleGetPostByID
+type GetPostByIDResponse struct {
 	Post     repository.Post      `json:"post"`
 	Comments []repository.Comment `json:"comments"`
 }
