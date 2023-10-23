@@ -2,12 +2,13 @@ package postgresql
 
 import (
 	"context"
+	"homework-3/internal/pkg/repository"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/jackc/pgx/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"homework-3/internal/pkg/repository"
-	"testing"
 )
 
 func TestRepo_GetPostByID(t *testing.T) {

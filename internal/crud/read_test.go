@@ -1,24 +1,26 @@
 package crud
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"homework-3/internal/pkg/repository"
+	"homework-3/tests/fixtures"
+	"homework-3/tests/states"
+	"net/http"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"homework-3/internal/pkg/repository"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
-
-func getReadRequestAndResponseRecorder(id int64) (*http.Request, *httptest.ResponseRecorder) {
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/post/%d", id), nil)
-	return req, httptest.NewRecorder()
-}
 
 func TestGetPostByID(t *testing.T) {
 	t.Parallel()
+
+	var (
+		ctx = context.Background()
+	)
 
 	t.Run("success", func(t *testing.T) {
 		t.Parallel()
@@ -27,45 +29,38 @@ func TestGetPostByID(t *testing.T) {
 		s := setUp(t)
 		defer s.tearDown()
 
-		postID := int64(1)
-		req, rr := getReadRequestAndResponseRecorder(postID)
-
-		s.mockRepo.EXPECT().GetPostByID(gomock.Any(), postID).Return(&repository.Post{
-			ID:      postID,
-			Content: "Content",
-			Likes:   5,
-		}, nil)
-
-		s.mockRepo.EXPECT().GetCommentsByPostID(gomock.Any(), postID).Return(
+		s.mockRepo.EXPECT().GetPostByID(gomock.Any(), states.Post1ID).Return(fixtures.BuildPost().Valid().P(), nil)
+		s.mockRepo.EXPECT().GetCommentsByPostID(gomock.Any(), states.Post1ID).Return(
 			[]repository.Comment{
-				{ID: 1, PostID: postID, Content: "awesome"},
-				{ID: 2, PostID: postID, Content: "hater is here!"},
+				fixtures.BuildComment().Valid().V(),
+				fixtures.BuildComment().Valid().ID(states.Comment2ID).Content(states.Comment2Content).V(),
 			},
 			nil)
 
 		// act
-		s.mockApp.Router.ServeHTTP(rr, req)
+		result, statusCode := s.mockApp.GetPostByID(ctx, states.Post1ID)
 
 		// assert
-		require.Equal(t, http.StatusOK, rr.Code)
+		require.Equal(t, http.StatusOK, statusCode)
 
 		var response getPostByIDResponse
-		err := json.Unmarshal(rr.Body.Bytes(), &response)
+		err := json.Unmarshal(result, &response)
 		require.NoError(t, err)
 
-		assert.Equal(t, postID, response.Post.ID)
-		assert.Equal(t, "Content", response.Post.Content)
-		assert.Equal(t, int64(5), response.Post.Likes)
+		assert.Equal(t, states.Post1ID, response.Post.ID)
+		assert.Equal(t, states.Post1Content, response.Post.Content)
+		assert.Equal(t, states.Post1Likes, response.Post.Likes)
+		assert.Equal(t, states.Post1CreatedAt, response.Post.CreatedAt)
 		assert.Len(t, response.Comments, 2)
 
-		assert.Equal(t, int64(1), response.Comments[0].ID)
-		assert.Equal(t, int64(2), response.Comments[1].ID)
+		assert.Equal(t, states.Comment1ID, response.Comments[0].ID)
+		assert.Equal(t, states.Comment2ID, response.Comments[1].ID)
 
-		assert.Equal(t, postID, response.Comments[0].PostID)
-		assert.Equal(t, postID, response.Comments[1].PostID)
+		assert.Equal(t, states.Post1ID, response.Comments[0].PostID)
+		assert.Equal(t, states.Post1ID, response.Comments[1].PostID)
 
-		assert.Equal(t, "awesome", response.Comments[0].Content)
-		assert.Equal(t, "hater is here!", response.Comments[1].Content)
+		assert.Equal(t, states.Comment1Content, response.Comments[0].Content)
+		assert.Equal(t, states.Comment2Content, response.Comments[1].Content)
 	})
 
 	t.Run("fail", func(t *testing.T) {
@@ -77,18 +72,14 @@ func TestGetPostByID(t *testing.T) {
 			s := setUp(t)
 			defer s.tearDown()
 
-			postID := int64(1)
-			req, rr := getReadRequestAndResponseRecorder(postID)
-
-			s.mockRepo.EXPECT().GetPostByID(gomock.Any(), postID).Return(nil, repository.ErrObjectNotFound)
+			s.mockRepo.EXPECT().GetPostByID(gomock.Any(), states.Post2ID).Return(nil, repository.ErrObjectNotFound)
 
 			// act
-			s.mockApp.Router.ServeHTTP(rr, req)
+			result, statusCode := s.mockApp.GetPostByID(ctx, states.Post2ID)
 
 			// assert
-			require.Equal(t, http.StatusNotFound, rr.Code)
-
-			require.Contains(t, rr.Body.String(), fmt.Sprintf("postRepo with id=%d not found, err: %v", postID, repository.ErrObjectNotFound))
+			require.Equal(t, http.StatusNotFound, statusCode)
+			require.Contains(t, string(result), fmt.Sprintf("postRepo with ID=%d not found, err: %v", states.Post2ID, repository.ErrObjectNotFound))
 		})
 
 		t.Run("internal error", func(t *testing.T) {
@@ -98,18 +89,15 @@ func TestGetPostByID(t *testing.T) {
 			s := setUp(t)
 			defer s.tearDown()
 
-			postID := int64(1)
-			req, rr := getReadRequestAndResponseRecorder(postID)
-
-			s.mockRepo.EXPECT().GetPostByID(gomock.Any(), postID).Return(nil, assert.AnError)
+			s.mockRepo.EXPECT().GetPostByID(gomock.Any(), states.Post2ID).Return(nil, assert.AnError)
 
 			// act
-			s.mockApp.Router.ServeHTTP(rr, req)
+			result, statusCode := s.mockApp.GetPostByID(ctx, states.Post2ID)
 
 			// assert
-			require.Equal(t, http.StatusInternalServerError, rr.Code)
+			require.Equal(t, http.StatusInternalServerError, statusCode)
 
-			require.Contains(t, rr.Body.String(), fmt.Sprintf("getting post error: %v", assert.AnError))
+			require.Contains(t, string(result), fmt.Sprintf("getting post error: %v", assert.AnError))
 		})
 
 		t.Run("getting comments error", func(t *testing.T) {
@@ -119,23 +107,15 @@ func TestGetPostByID(t *testing.T) {
 			s := setUp(t)
 			defer s.tearDown()
 
-			postID := int64(1)
-			req, rr := getReadRequestAndResponseRecorder(postID)
-
-			s.mockRepo.EXPECT().GetPostByID(gomock.Any(), postID).Return(&repository.Post{
-				ID:      postID,
-				Content: "Content",
-				Likes:   5,
-			}, nil)
-
-			s.mockRepo.EXPECT().GetCommentsByPostID(gomock.Any(), postID).Return(nil, assert.AnError)
+			s.mockRepo.EXPECT().GetPostByID(gomock.Any(), states.Post2ID).Return(fixtures.BuildPost().Valid().P(), nil)
+			s.mockRepo.EXPECT().GetCommentsByPostID(gomock.Any(), states.Post2ID).Return(nil, assert.AnError)
 
 			// act
-			s.mockApp.Router.ServeHTTP(rr, req)
+			result, statusCode := s.mockApp.GetPostByID(ctx, states.Post2ID)
 
 			// assert
-			require.Equal(t, http.StatusInternalServerError, rr.Code)
-			require.Contains(t, rr.Body.String(), fmt.Sprintf("getting comments error: %v", assert.AnError))
+			require.Equal(t, http.StatusInternalServerError, statusCode)
+			require.Contains(t, string(result), fmt.Sprintf("getting comments error: %v", assert.AnError))
 		})
 	})
 }

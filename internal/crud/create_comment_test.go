@@ -1,30 +1,24 @@
 package crud
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"homework-3/internal/pkg/repository"
+	"homework-3/tests/fixtures"
+	"homework-3/tests/states"
+	"net/http"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"homework-3/internal/pkg/repository"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
-
-func getCreateCommentRequestAndResponseRecorder(body []byte, postID int64) (*http.Request, *httptest.ResponseRecorder) {
-	req, _ := http.NewRequest("POST", fmt.Sprintf("/post/%d/comment", postID), strings.NewReader(string(body)))
-	return req, httptest.NewRecorder()
-}
 
 func TestCreateComment(t *testing.T) {
 	t.Parallel()
 	var (
-		commentRequest = addCommentRequest{
-			Content: "Test Comment",
-		}
-		postID = int64(1)
+		ctx = context.Background()
 	)
 
 	t.Run("success", func(t *testing.T) {
@@ -34,48 +28,26 @@ func TestCreateComment(t *testing.T) {
 		s := setUp(t)
 		defer s.tearDown()
 
-		s.mockRepo.EXPECT().AddComment(gomock.Any(), gomock.Any()).Return(int64(1), nil)
-
-		reqBody, _ := json.Marshal(commentRequest)
-		req, rr := getCreateCommentRequestAndResponseRecorder(reqBody, postID)
+		s.mockRepo.EXPECT().AddComment(gomock.Any(), gomock.Any()).Return(states.Comment1ID, nil)
+		comment := fixtures.BuildComment().Valid().P()
 
 		// act
-		s.mockApp.Router.ServeHTTP(rr, req)
+		data, status := s.mockApp.CreateComment(ctx, comment)
 
 		// assert
-		require.Equal(t, http.StatusOK, rr.Code)
+		require.Equal(t, http.StatusOK, status)
 
 		var commentResponse repository.Comment
-		err := json.Unmarshal(rr.Body.Bytes(), &commentResponse)
+		err := json.Unmarshal(data, &commentResponse)
 		require.NoError(t, err)
 
-		require.Equal(t, http.StatusOK, rr.Code)
-
-		assert.Equal(t, int64(1), commentResponse.ID)
-		assert.Equal(t, postID, commentResponse.PostID)
-		assert.Equal(t, commentRequest.Content, commentResponse.Content)
+		assert.Equal(t, states.Comment1ID, commentResponse.ID)
+		assert.Equal(t, comment.PostID, commentResponse.PostID)
+		assert.Equal(t, comment.Content, commentResponse.Content)
 	})
 
 	t.Run("fail", func(t *testing.T) {
 		t.Parallel()
-		t.Run("bad input", func(t *testing.T) {
-			t.Parallel()
-
-			// arrange
-			s := setUp(t)
-			defer s.tearDown()
-
-			badRequest := []byte(`{"bad_field": "bad"}`)
-			req, rr := getCreateCommentRequestAndResponseRecorder(badRequest, postID)
-
-			// act
-			s.mockApp.Router.ServeHTTP(rr, req)
-
-			// assert
-			require.Equal(t, http.StatusBadRequest, rr.Code)
-			require.Contains(t, rr.Body.String(), fmt.Sprintf(`"content" field is missing`))
-		})
-
 		t.Run("repository error", func(t *testing.T) {
 			t.Parallel()
 
@@ -83,18 +55,63 @@ func TestCreateComment(t *testing.T) {
 			s := setUp(t)
 			defer s.tearDown()
 
-			s.mockRepo.EXPECT().AddComment(gomock.Any(), gomock.Any()).Return(int64(0), assert.AnError)
-
-			reqBody, _ := json.Marshal(commentRequest)
-			req, _ := http.NewRequest("POST", fmt.Sprintf("/post/%d/comment", postID), strings.NewReader(string(reqBody)))
-			rr := httptest.NewRecorder()
+			s.mockRepo.EXPECT().AddComment(gomock.Any(), gomock.Any()).Return(states.Comment2ID, assert.AnError)
+			comment := fixtures.BuildComment().Valid().P()
 
 			// act
-			s.mockApp.Router.ServeHTTP(rr, req)
+			data, status := s.mockApp.CreateComment(ctx, comment)
 
 			// assert
-			require.Equal(t, http.StatusInternalServerError, rr.Code)
-			require.Contains(t, rr.Body.String(), fmt.Sprintf("could not add comment. Body: %v, err: %v", reqBody, assert.AnError))
+			require.Equal(t, http.StatusInternalServerError, status)
+			require.Contains(t, string(data), fmt.Sprintf("could not add comment. err: %v", assert.AnError))
 		})
 	})
+}
+
+func Test_parseCreateComment(t *testing.T) {
+	type args struct {
+		body   []byte
+		postID int64
+	}
+	tests := []struct {
+		name  string
+		args  args
+		want  *repository.Comment
+		want1 int
+	}{
+		{
+			name: "success",
+			args: args{
+				body:   []byte(fmt.Sprintf(`{"content":"%s"}`, states.Comment1Content)),
+				postID: states.Post1ID,
+			},
+			want:  fixtures.BuildComment().Content(states.Comment1Content).PostID(states.Post1ID).P(),
+			want1: http.StatusOK,
+		},
+		{
+			name: "fail - empty content",
+			args: args{
+				body:   []byte(fmt.Sprintf(`{"content":"%s"}`, "")),
+				postID: states.Post1ID,
+			},
+			want:  nil,
+			want1: http.StatusBadRequest,
+		},
+		{
+			name: "fail - invalid body",
+			args: args{
+				body:   []byte(fmt.Sprintf(`{content:"%s"}`, "")), //no quotation marks
+				postID: states.Post1ID,
+			},
+			want:  nil,
+			want1: http.StatusBadRequest,
+		}, // TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1 := parseCreateComment(tt.args.body, tt.args.postID)
+			assert.Equalf(t, tt.want, got, "parseCreateComment(%v, %v)", tt.args.body, tt.args.postID)
+			assert.Equalf(t, tt.want1, got1, "parseCreateComment(%v, %v)", tt.args.body, tt.args.postID)
+		})
+	}
 }

@@ -3,9 +3,10 @@ package postgresql
 import (
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	mockdatabase "homework-3/internal/pkg/db/mocks"
 	"homework-3/internal/pkg/repository"
+
+	"github.com/golang/mock/gomock"
 )
 
 type articlesRepoFixture struct {

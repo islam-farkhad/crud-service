@@ -1,29 +1,26 @@
 package crud
 
 import (
+	mockrepository "homework-3/internal/pkg/repository/mocks"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
-	mock_repository "homework-3/internal/pkg/repository/mocks"
-	"testing"
 )
 
 type appFixture struct {
 	ctrl     *gomock.Controller
 	mockApp  App
-	mockRepo mock_repository.MockRepo
+	mockRepo mockrepository.MockRepo
 }
 
 func setUp(t *testing.T) appFixture {
 	ctrl := gomock.NewController(t)
-	mockRepo := mock_repository.NewMockRepo(ctrl)
+	mockRepo := mockrepository.NewMockRepo(ctrl)
 	mockApp := App{
 		Router: mux.NewRouter(),
 		Repo:   mockRepo,
 	}
-
-	mockApp.Router.HandleFunc("/post/{id:[\\S]*}", mockApp.DeletePostByID).Methods("DELETE")
-	mockApp.Router.HandleFunc("/post/{id:[\\S]*}", mockApp.GetPostByID).Methods("GET")
-	mockApp.Router.HandleFunc("/post/{id:[0-9]+}/comment", mockApp.CreateComment).Methods("POST")
 
 	return appFixture{
 		ctrl:     ctrl,

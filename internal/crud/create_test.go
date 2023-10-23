@@ -1,29 +1,27 @@
 package crud
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"homework-3/internal/pkg/repository"
+	"homework-3/tests/fixtures"
+	"homework-3/tests/states"
+	"net/http"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"homework-3/internal/pkg/repository"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
-func getCreatePostRequestAndResponseRecorder(body []byte) (*http.Request, *httptest.ResponseRecorder) {
-	req, _ := http.NewRequest("POST", "/post", strings.NewReader(string(body)))
-	return req, httptest.NewRecorder()
-}
-
-func TestCreatePost(t *testing.T) {
+func Test_CreatePost(t *testing.T) {
 	t.Parallel()
 	var (
+		ctx         = context.Background()
 		postRequest = addPostRequest{
-			Content: "Test Content",
-			Likes:   10,
+			Content: states.Post1Content,
+			Likes:   states.Post1Likes,
 		}
 	)
 
@@ -34,45 +32,27 @@ func TestCreatePost(t *testing.T) {
 		s := setUp(t)
 		defer s.tearDown()
 
-		s.mockRepo.EXPECT().AddPost(gomock.Any(), gomock.Any()).Return(int64(1), nil)
+		s.mockRepo.EXPECT().AddPost(gomock.Any(), gomock.Any()).Return(states.Post1ID, nil)
 
-		reqBody, _ := json.Marshal(postRequest)
-		req, rr := getCreatePostRequestAndResponseRecorder(reqBody)
+		post := fixtures.BuildPost().Valid().P()
 
 		// act
-		s.mockApp.CreatePost(rr, req)
+		result, status := s.mockApp.CreatePost(ctx, post)
 
 		// assert
-		require.Equal(t, http.StatusOK, rr.Code)
+		require.Equal(t, http.StatusOK, status)
 
 		var postResponse repository.Post
-		err := json.Unmarshal(rr.Body.Bytes(), &postResponse)
+		err := json.Unmarshal(result, &postResponse)
 		require.NoError(t, err)
 
-		assert.Equal(t, int64(1), postResponse.ID)
+		assert.Equal(t, states.Post1ID, postResponse.ID)
 		assert.Equal(t, postRequest.Content, postResponse.Content)
 		assert.Equal(t, postRequest.Likes, postResponse.Likes)
 	})
 
 	t.Run("fail", func(t *testing.T) {
 		t.Parallel()
-		t.Run("bad input", func(t *testing.T) {
-			t.Parallel()
-
-			s := setUp(t)
-			defer s.tearDown()
-			// arrange
-			invalidRequest := []byte(`{"bad_field": "bad"}`)
-			req, rr := getCreatePostRequestAndResponseRecorder(invalidRequest)
-
-			// act
-			s.mockApp.CreatePost(rr, req)
-
-			// assert
-			require.Equal(t, http.StatusBadRequest, rr.Code)
-			require.Contains(t, rr.Body.String(), fmt.Sprintf(`"content" field is missing`))
-		})
-
 		t.Run("repository error", func(t *testing.T) {
 			t.Parallel()
 
@@ -82,15 +62,52 @@ func TestCreatePost(t *testing.T) {
 
 			s.mockRepo.EXPECT().AddPost(gomock.Any(), gomock.Any()).Return(int64(0), assert.AnError)
 
-			reqBody, _ := json.Marshal(postRequest)
-			req, rr := getCreatePostRequestAndResponseRecorder(reqBody)
+			post := fixtures.BuildPost().Valid().P()
 
 			// act
-			s.mockApp.CreatePost(rr, req)
+			result, status := s.mockApp.CreatePost(ctx, post)
 
 			// assert
-			require.Equal(t, http.StatusInternalServerError, rr.Code)
-			require.Contains(t, rr.Body.String(), fmt.Sprintf("could not add post. Body: %v, err: %v", reqBody, assert.AnError))
+			require.Equal(t, http.StatusInternalServerError, status)
+			require.Contains(t, string(result), fmt.Sprintf("could not add post. err: %v", assert.AnError))
 		})
 	})
+}
+
+func Test_parseCreatePost(t *testing.T) {
+	type args struct {
+		body []byte
+	}
+	tests := []struct {
+		name  string
+		args  args
+		want  *repository.Post
+		want1 int
+	}{
+		{
+			name:  "success",
+			args:  args{[]byte(fmt.Sprintf("{\"content\":\"%s\",\"likes\":%d}", states.Post1Content, states.Post1Likes))},
+			want:  fixtures.BuildPost().Content(states.Post1Content).Likes(states.Post1Likes).P(),
+			want1: http.StatusOK,
+		},
+		{
+			name:  "fail - invalid quotation marks",
+			args:  args{[]byte(fmt.Sprintf("{\"content\":%s,\"likes\":\"%d\"}", states.Post1Content, states.Post1Likes))},
+			want:  nil,
+			want1: http.StatusBadRequest,
+		},
+		{
+			name:  "fail",
+			args:  args{[]byte(fmt.Sprintf("{\"not_a_content\":\"%s\",\"likes\":%d}", states.Post1Content, states.Post1Likes))},
+			want:  nil,
+			want1: http.StatusBadRequest,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1 := parseCreatePost(tt.args.body)
+			assert.Equalf(t, tt.want, got, "parseCreatePost(%v)", tt.args.body)
+			assert.Equalf(t, tt.want1, got1, "parseCreatePost(%v)", tt.args.body)
+		})
+	}
 }
