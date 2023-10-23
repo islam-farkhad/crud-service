@@ -3,9 +3,7 @@
 package tests
 
 import (
-	"encoding/json"
 	"fmt"
-	"homework-3/internal/pkg/repository"
 	"homework-3/internal/utils"
 	"homework-3/tests/states"
 	"net/http"
@@ -21,8 +19,7 @@ func getDeletePostRoute(postID int64) string {
 func Test_DeletePost(t *testing.T) {
 	t.Parallel()
 	var (
-		createPostRoute = "/test/post"
-		deleteRoute     string
+		deleteRoute string
 	)
 
 	t.Run("success", func(t *testing.T) {
@@ -31,19 +28,10 @@ func Test_DeletePost(t *testing.T) {
 		defer database.TearDown()
 
 		// arrange
-		postRaw := []byte(fmt.Sprintf(`{"content":"%s","likes":%d}`, states.Post1Content, states.Post1Likes))
-		req, rr := utils.GetRequestAndResponseRecorder(states.PostMethod, createPostRoute, postRaw)
-
-		testApp.Router.ServeHTTP(rr, req)
-
-		post := &repository.Post{}
-		err := json.Unmarshal(rr.Body.Bytes(), post)
-		if err != nil {
-			panic(err)
-		}
+		post := AddPostToTestDB(&testApp)
 
 		deleteRoute = getDeletePostRoute(post.ID)
-		req, rr = utils.GetRequestAndResponseRecorder(states.DeleteMethod, deleteRoute, nil)
+		req, rr := utils.GetRequestAndResponseRecorder(states.DeleteMethod, deleteRoute, nil)
 
 		//act
 		testApp.Router.ServeHTTP(rr, req)

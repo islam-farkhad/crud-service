@@ -21,7 +21,6 @@ func getCommentRoute(postID int64) string {
 func Test_CreateComment(t *testing.T) {
 	t.Parallel()
 	var (
-		route        = "/test/post"
 		commentRoute = ""
 	)
 
@@ -31,27 +30,18 @@ func Test_CreateComment(t *testing.T) {
 		defer database.TearDown()
 
 		// arrange
-		postRaw := []byte(fmt.Sprintf(`{"content":"%s","likes":%d}`, states.Post1Content, states.Post1Likes))
-		req, rr := utils.GetRequestAndResponseRecorder(states.PostMethod, route, postRaw)
-
-		testApp.Router.ServeHTTP(rr, req)
-
-		post := &repository.Post{}
-		err := json.Unmarshal(rr.Body.Bytes(), post)
-		if err != nil {
-			panic(err)
-		}
+		post := AddPostToTestDB(&testApp)
 
 		commentRaw := []byte(fmt.Sprintf(`{"content":"%s"}`, states.Comment1Content))
 		commentRoute = getCommentRoute(post.ID)
-		req, rr = utils.GetRequestAndResponseRecorder(states.PostMethod, commentRoute, commentRaw)
+		req, rr := utils.GetRequestAndResponseRecorder(states.PostMethod, commentRoute, commentRaw)
 
 		//act
 		testApp.Router.ServeHTTP(rr, req)
 
 		//assert
 		comment := &repository.Comment{}
-		err = json.Unmarshal(rr.Body.Bytes(), comment)
+		err := json.Unmarshal(rr.Body.Bytes(), comment)
 		if err != nil {
 			panic(err)
 		}
