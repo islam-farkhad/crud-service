@@ -18,13 +18,13 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	database, err := db.NewDB(ctx)
+	database, err := db.NewDB(ctx, db.GetDBConnectionString())
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer database.GetConnectionsPool(ctx).Close()
 
-	app := crud.NewApp(mux.NewRouter(), postgresql.NewRepo(database))
+	app := crud.NewApp(mux.NewRouter(), postgresql.NewRepo(database), "")
 
 	http.Handle("/", app.Router)
 

@@ -1,6 +1,7 @@
 package crud
 
 import (
+	"fmt"
 	"homework-3/internal/pkg/repository"
 	"homework-3/internal/pkg/repository/postgresql"
 
@@ -15,19 +16,19 @@ type App struct {
 
 // NewApp creates a new instance of the App type with the provided router and repository.
 // It initializes the routes for the application.
-func NewApp(router *mux.Router, repo *postgresql.Repo) App {
+func NewApp(router *mux.Router, repo *postgresql.Repo, prefix string) App {
 	app := App{
 		Router: router,
 		Repo:   repo,
 	}
-	app.initializeRoutes()
+	app.initializeRoutes(prefix)
 	return app
 }
 
-func (app *App) initializeRoutes() {
-	app.Router.HandleFunc("/post", app.HandleCreatePost).Methods("POST")
-	app.Router.HandleFunc("/post/{id:[\\S]*}", app.HandleGetPostByID).Methods("GET")
-	app.Router.HandleFunc("/post/{id:[0-9]+}/comment", app.HandleCreateComment).Methods("POST")
-	app.Router.HandleFunc("/post", app.HandleUpdatePost).Methods("PUT")
-	app.Router.HandleFunc("/post/{id:[\\S]*}", app.HandleDeletePostByID).Methods("DELETE")
+func (app *App) initializeRoutes(prefix string) {
+	app.Router.HandleFunc(fmt.Sprintf("%s/post", prefix), app.HandleCreatePost).Methods("POST")
+	app.Router.HandleFunc(fmt.Sprintf("%s/post/{id:[\\S]*}", prefix), app.HandleGetPostByID).Methods("GET")
+	app.Router.HandleFunc(fmt.Sprintf("%s/post/{id:[0-9]+}/comment", prefix), app.HandleCreateComment).Methods("POST")
+	app.Router.HandleFunc(fmt.Sprintf("%s/post", prefix), app.HandleUpdatePost).Methods("PUT")
+	app.Router.HandleFunc(fmt.Sprintf("%s/post/{id:[\\S]*}", prefix), app.HandleDeletePostByID).Methods("DELETE")
 }
