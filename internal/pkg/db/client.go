@@ -18,15 +18,16 @@ const (
 )
 
 // NewDB is used to construct new connections pool
-func NewDB(ctx context.Context) (*Database, error) {
-	connectionsPool, err := pgxpool.Connect(ctx, getDBConnectionString())
+func NewDB(ctx context.Context, connectionString string) (*Database, error) {
+	connectionsPool, err := pgxpool.Connect(ctx, connectionString)
 	if err != nil {
 		return nil, err
 	}
 	return newDatabase(connectionsPool), nil
 }
 
-func getDBConnectionString() string {
+// GetDBConnectionString retrieves connection string to db from env.
+func GetDBConnectionString() string {
 	portStr := os.Getenv("port")
 	if portStr == "" {
 		portStr = testPortStr
