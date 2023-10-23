@@ -48,7 +48,7 @@ func TestCreateComment(t *testing.T) {
 
 	t.Run("fail", func(t *testing.T) {
 		t.Parallel()
-		t.Run("repository error", func(t *testing.T) {
+		t.Run("violating fk constraint", func(t *testing.T) {
 			t.Parallel()
 
 			// arrange
@@ -62,7 +62,7 @@ func TestCreateComment(t *testing.T) {
 			data, status := s.mockApp.CreateComment(ctx, comment)
 
 			// assert
-			require.Equal(t, http.StatusInternalServerError, status)
+			require.Equal(t, http.StatusBadRequest, status)
 			require.Contains(t, string(data), fmt.Sprintf("could not add comment. err: %v", assert.AnError))
 		})
 	})
