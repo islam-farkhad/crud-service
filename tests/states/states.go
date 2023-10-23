@@ -8,8 +8,10 @@ const (
 	Post2ID = int64(500002)
 
 	Post1Content = "post1"
+	Post2Content = "post2"
 
 	Post1Likes = int64(10)
+	Post2Likes = int64(20)
 )
 
 // Post1CreatedAt General CreatedAt of post for testing
