@@ -23,3 +23,11 @@ const (
 	Comment1Content = "awesome post!"
 	Comment2Content = "hater is here!"
 )
+
+// HTTP methods
+const (
+	DeleteMethod = "DELETE"
+	PutMethod    = "PUT"
+	PostMethod   = "POST"
+	GetMethod    = "GET"
+)

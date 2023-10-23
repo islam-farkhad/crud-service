@@ -17,8 +17,7 @@ import (
 func Test_CreatePost(t *testing.T) {
 	t.Parallel()
 	var (
-		method = "POST"
-		route  = "/test/post"
+		route = "/test/post"
 	)
 
 	t.Run("success", func(t *testing.T) {
@@ -29,7 +28,7 @@ func Test_CreatePost(t *testing.T) {
 		// arrange
 		postRaw := []byte(fmt.Sprintf(`{"content":"%s","likes":%d}`, states.Post1Content, states.Post1Likes))
 
-		req, rr := utils.GetRequestAndResponseRecorder(method, route, postRaw)
+		req, rr := utils.GetRequestAndResponseRecorder(states.PostMethod, route, postRaw)
 
 		//act
 		testApp.Router.ServeHTTP(rr, req)
@@ -53,7 +52,7 @@ func Test_CreatePost(t *testing.T) {
 
 		// arrange
 		postRaw := []byte(fmt.Sprintf(`{"no_content":"%s","likes":%d}`, states.Post1Content, states.Post1Likes))
-		req, rr := utils.GetRequestAndResponseRecorder(method, route, postRaw)
+		req, rr := utils.GetRequestAndResponseRecorder(states.PostMethod, route, postRaw)
 
 		//act
 		testApp.Router.ServeHTTP(rr, req)
