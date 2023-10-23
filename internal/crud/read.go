@@ -27,7 +27,7 @@ func (app *App) GetPostByID(ctx context.Context, ID int64) ([]byte, int) {
 		return []byte(fmt.Sprintf("getting comments error: %v", err)), http.StatusInternalServerError
 	}
 
-	response := getPostByIDResponse{
+	response := GetPostByIDResponse{
 		Post:     *postRepo,
 		Comments: comments,
 	}
