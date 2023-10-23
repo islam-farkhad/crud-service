@@ -5,6 +5,10 @@ endif
 INTERNAL_PKG_PATH=$(CURDIR)/internal/pkg
 MIGRATION_FOLDER=$(INTERNAL_PKG_PATH)/db/migrations
 
+.PHONY: test-db-up
+test-db-up:
+	sudo docker-compose up -d
+
 .PHONY: migration-create
 migration-create:
 	goose -dir "$(MIGRATION_FOLDER)" create "$(name)" sql
@@ -16,4 +20,13 @@ test-migration-up:
 .PHONY: test-migration-down
 test-migration-down:
 	goose -dir "$(MIGRATION_FOLDER)" postgres "$(POSTGRES_SETUP_TEST)" down
+
+.PHONY: run-integration-tests
+run-integration-tests:
+	go test -v -tags=integration ./tests
+
+.PHONY: run-unit-tests
+run-integration-tests:
+	go test -v ./internal/crud/...
+
 
