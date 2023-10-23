@@ -18,7 +18,6 @@ func (app *App) CreatePost(ctx context.Context, postRepo *repository.Post) ([]by
 		return []byte(fmt.Sprintf("could not add post. err: %v", err)), http.StatusInternalServerError
 	}
 	postRepo.ID = id
-	// TODO: нужно начать устанавливать CreatedAt
 
 	postJSON, _ := json.Marshal(postRepo)
 
