@@ -26,7 +26,7 @@ run-integration-tests:
 	go test -v -tags=integration ./tests
 
 .PHONY: run-unit-tests
-run-integration-tests:
+run-unit-tests:
 	go test -v ./internal/crud/...
 
 
