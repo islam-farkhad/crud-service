@@ -1,30 +1,42 @@
 package crud
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"homework-3/internal/pkg/repository"
 	"homework-3/internal/utils"
+	"log"
 	"net/http"
 )
 
-// DeletePostByID handles the HTTP request for deleting a post by its ID.
-// It reads the post ID from the request parameters, attempts to delete the post,
-// and responds with an appropriate status code.
-func (app *App) DeletePostByID(w http.ResponseWriter, req *http.Request) {
-	id, ok := utils.GetIDFromQueryParams(w, req)
-	if !ok {
-		return
-	}
+// DeletePostByID deletes post and its comments with provided postID
+func (app *App) DeletePostByID(ctx context.Context, postID int64) ([]byte, int) {
 
-	_, err := app.Repo.DeletePostByID(req.Context(), id)
+	_, err := app.Repo.DeletePostByID(ctx, postID)
 	if err != nil {
 		if errors.Is(err, repository.ErrObjectNotFound) {
-			utils.HandleError(w, http.StatusNotFound, fmt.Errorf("postRepo with id=%d not found, err: %w", id, err))
-			return
+			return []byte(fmt.Sprintf("postRepo with postID=%d not found, err: %v", postID, err)), http.StatusNotFound
 		}
-		utils.HandleError(w, http.StatusInternalServerError, fmt.Errorf("deleting post by id error: %w", err))
+		return []byte(fmt.Sprintf("deleting post by postID error: %v", err)), http.StatusInternalServerError
+	}
+	return nil, http.StatusOK
+}
+
+// HandleDeletePostByID processes an HTTP request to retrieve a post by its ID.
+func (app *App) HandleDeletePostByID(w http.ResponseWriter, req *http.Request) {
+
+	id, status := utils.RetrieveID(req)
+	if status != http.StatusOK {
+		w.WriteHeader(status)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+	data, status := app.GetPostByID(req.Context(), id)
+	w.WriteHeader(status)
+
+	_, err := w.Write(data)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
 }

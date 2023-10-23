@@ -25,9 +25,9 @@ func NewApp(router *mux.Router, repo *postgresql.Repo) App {
 }
 
 func (app *App) initializeRoutes() {
-	app.Router.HandleFunc("/post", app.CreatePost).Methods("POST")
-	app.Router.HandleFunc("/post/{id:[\\S]*}", app.GetPostByID).Methods("GET")
-	app.Router.HandleFunc("/post/{id:[0-9]+}/comment", app.CreateComment).Methods("POST")
-	app.Router.HandleFunc("/post", app.UpdatePost).Methods("PUT")
-	app.Router.HandleFunc("/post/{id:[\\S]*}", app.DeletePostByID).Methods("DELETE")
+	app.Router.HandleFunc("/post", app.HandleCreatePost).Methods("POST")
+	app.Router.HandleFunc("/post/{id:[\\S]*}", app.HandleGetPostByID).Methods("GET")
+	app.Router.HandleFunc("/post/{id:[0-9]+}/comment", app.HandleCreateComment).Methods("POST")
+	app.Router.HandleFunc("/post", app.HandleUpdatePost).Methods("PUT")
+	app.Router.HandleFunc("/post/{id:[\\S]*}", app.HandleDeletePostByID).Methods("DELETE")
 }

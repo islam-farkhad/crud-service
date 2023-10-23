@@ -1,4 +1,5 @@
 //go:generate mockgen -source ./database.go -destination=./mocks/database.go -package=mock_database
+
 package db
 
 import (
@@ -10,11 +11,13 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
+// PGX is an interface that extends the DBops interface and provides methods for transaction handling.
 type PGX interface {
 	DBops
 	BeginTX(ctx context.Context, options *pgx.TxOptions)
 }
 
+// DBops is an interface that defines common database operations.
 type DBops interface {
 	Select(ctx context.Context, dest interface{}, query string, args ...interface{}) error
 	Get(ctx context.Context, dest interface{}, query string, args ...interface{}) error

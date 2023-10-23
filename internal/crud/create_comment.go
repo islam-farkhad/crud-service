@@ -1,38 +1,40 @@
 package crud
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"homework-3/internal/pkg/repository"
 	"homework-3/internal/utils"
-	"io"
+	"log"
 	"net/http"
 )
 
-// CreateComment handles the HTTP request for creating a comment.
-// It reads the comment data from the request body, validates the input,
-// adds the comment to the repository, and responds with the created comment.
-func (app *App) CreateComment(w http.ResponseWriter, req *http.Request) {
-	body, err := io.ReadAll(req.Body)
+// CreateComment adds the comment to the repository.
+func (app *App) CreateComment(ctx context.Context, comment *repository.Comment) ([]byte, int) {
+
+	commentID, err := app.Repo.AddComment(ctx, comment)
 	if err != nil {
-		utils.HandleError(w, http.StatusInternalServerError, fmt.Errorf("could not read body from request: %w", err))
-		return
+		return []byte(fmt.Sprintf("could not add comment. err: %v", err)), http.StatusInternalServerError
 	}
 
+	comment.ID = commentID
+	commentJSON, _ := json.Marshal(comment)
+	if err != nil {
+		return []byte(fmt.Sprintf("can not marshal comment. comment.PostID: %d, comment.Content: %s, err: %v", comment.PostID, comment.Content, err)), http.StatusInternalServerError
+	}
+
+	return commentJSON, http.StatusOK
+}
+
+func parseCreateComment(body []byte, postID int64) (*repository.Comment, int) {
 	var unmarshal addCommentRequest
-	if err = json.Unmarshal(body, &unmarshal); err != nil {
-		utils.HandleError(w, http.StatusInternalServerError, fmt.Errorf("could not unmarshal from body. Body: %v, err: %w", body, err))
-		return
+	if err := json.Unmarshal(body, &unmarshal); err != nil {
+		return nil, http.StatusBadRequest
 	}
 
 	if len(unmarshal.Content) == 0 {
-		utils.HandleError(w, http.StatusBadRequest, fmt.Errorf(`"content" field is missing`))
-		return
-	}
-
-	postID, ok := utils.GetIDFromQueryParams(w, req)
-	if !ok {
-		return
+		return nil, http.StatusBadRequest
 	}
 
 	comment := &repository.Comment{
@@ -40,23 +42,33 @@ func (app *App) CreateComment(w http.ResponseWriter, req *http.Request) {
 		Content: unmarshal.Content,
 	}
 
-	commentID, err := app.Repo.AddComment(req.Context(), comment)
-	if err != nil {
-		utils.HandleError(w, http.StatusInternalServerError, fmt.Errorf("could not add comment. Body: %v, err: %w", body, err))
+	return comment, http.StatusOK
+}
+
+// HandleCreateComment processes an HTTP request to create a comment for a post.
+func (app *App) HandleCreateComment(w http.ResponseWriter, req *http.Request) {
+	body, status := utils.RetrieveBody(req)
+	if status != http.StatusOK {
+		w.WriteHeader(status)
 		return
 	}
 
-	comment.ID = commentID
-	commentJSON, err := json.Marshal(comment)
-	if err != nil {
-		utils.HandleError(w, http.StatusInternalServerError, fmt.Errorf("can not marshal comment. comment.PostID: %d, comment.Content: %s, err: %w", comment.PostID, comment.Content, err))
+	postID, ok := utils.GetIDFromQueryParams(req)
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	_, err = w.Write(commentJSON)
+	commentRepo, status := parseCreateComment(body, postID)
+	if status != http.StatusOK {
+		w.WriteHeader(status)
+		return
+	}
+	data, status := app.CreateComment(req.Context(), commentRepo)
+	w.WriteHeader(status)
+	_, err := w.Write(data)
 	if err != nil {
-		utils.HandleError(w, http.StatusInternalServerError, fmt.Errorf("write error: %w", err))
+		log.Println(err.Error())
 		return
 	}
 }

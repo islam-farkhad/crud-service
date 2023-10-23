@@ -1,55 +1,66 @@
 package crud
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"homework-3/internal/pkg/repository"
 	"homework-3/internal/utils"
-	"io"
+	"log"
 	"net/http"
 )
 
-// CreatePost handles the HTTP request for creating a post.
-// It reads the post data from the request body, validates the input,
-// adds the post to the repository, and responds with the created post.
-func (app *App) CreatePost(w http.ResponseWriter, req *http.Request) {
-	body, err := io.ReadAll(req.Body)
-	if err != nil {
-		utils.HandleError(w, http.StatusInternalServerError, fmt.Errorf("could not read body from request: %w", err))
-		return
-	}
+// CreatePost creates a new post in database.
+func (app *App) CreatePost(ctx context.Context, postRepo *repository.Post) ([]byte, int) {
 
+	id, err := app.Repo.AddPost(ctx, postRepo)
+	if err != nil {
+		return []byte(fmt.Sprintf("could not add post. err: %v", err)), http.StatusInternalServerError
+	}
+	postRepo.ID = id
+	// TODO: нужно начать устанавливать CreatedAt
+
+	postJSON, _ := json.Marshal(postRepo)
+
+	return postJSON, http.StatusOK
+}
+
+func parseCreatePost(body []byte) (*repository.Post, int) {
 	var unmarshal addPostRequest
-	if err = json.Unmarshal(body, &unmarshal); err != nil {
-		utils.HandleError(w, http.StatusInternalServerError, fmt.Errorf("could not unmarshal from body. Body: %v, err: %w", body, err))
-		return
+	if err := json.Unmarshal(body, &unmarshal); err != nil {
+		return nil, http.StatusBadRequest
 	}
 
 	if len(unmarshal.Content) == 0 {
-		utils.HandleError(w, http.StatusBadRequest, fmt.Errorf(`"content" field is missing`))
-		return
+		return nil, http.StatusBadRequest
 	}
 
 	postRepo := &repository.Post{
 		Content: unmarshal.Content,
 		Likes:   unmarshal.Likes,
 	}
-	id, err := app.Repo.AddPost(req.Context(), postRepo)
-	if err != nil {
-		utils.HandleError(w, http.StatusInternalServerError, fmt.Errorf("could not add post. Body: %v, err: %w", body, err))
-		return
-	}
-	postRepo.ID = id
-	postJSON, err := json.Marshal(postRepo)
-	if err != nil {
-		utils.HandleError(w, http.StatusInternalServerError, fmt.Errorf("can not marshal Post. postRepo.Content: %s, postRepo.Likes: %d, err: %w", postRepo.Content, postRepo.Likes, err))
+
+	return postRepo, http.StatusOK
+}
+
+// HandleCreatePost processes an HTTP request for creating a new post.
+func (app *App) HandleCreatePost(w http.ResponseWriter, req *http.Request) {
+	body, status := utils.RetrieveBody(req)
+	if status != http.StatusOK {
+		w.WriteHeader(status)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	_, err = w.Write(postJSON)
+	postRepo, status := parseCreatePost(body)
+	if status != http.StatusOK {
+		w.WriteHeader(status)
+		return
+	}
+	data, status := app.CreatePost(req.Context(), postRepo)
+	w.WriteHeader(status)
+	_, err := w.Write(data)
 	if err != nil {
-		utils.HandleError(w, http.StatusInternalServerError, fmt.Errorf("write error: %w", err))
+		log.Println(err.Error())
 		return
 	}
 }
