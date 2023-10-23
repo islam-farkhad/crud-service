@@ -15,7 +15,7 @@ func (app *App) CreateComment(ctx context.Context, comment *repository.Comment) 
 
 	commentID, err := app.Repo.AddComment(ctx, comment)
 	if err != nil {
-		return []byte(fmt.Sprintf("could not add comment. err: %v", err)), http.StatusInternalServerError
+		return []byte(fmt.Sprintf("could not add comment. err: %v", err)), http.StatusBadRequest
 	}
 
 	comment.ID = commentID
