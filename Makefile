@@ -7,7 +7,7 @@ MIGRATION_FOLDER=$(INTERNAL_PKG_PATH)/db/migrations
 
 .PHONY: test-db-up
 test-db-up:
-	sudo docker-compose up -d
+	docker-compose up -d
 
 .PHONY: migration-create
 migration-create:
