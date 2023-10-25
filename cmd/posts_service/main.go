@@ -20,6 +20,10 @@ func main() {
 
 	database, err := db.NewDB(ctx, db.GetDBConnectionString())
 	if err != nil {
+
+		println(db.GetDBConnectionString())
+		println("AAAAA")
+
 		log.Fatal(err)
 	}
 	defer database.GetConnectionsPool(ctx).Close()

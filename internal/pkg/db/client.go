@@ -28,6 +28,10 @@ func NewDB(ctx context.Context, connectionString string) (*Database, error) {
 
 // GetDBConnectionString retrieves connection string to db from env.
 func GetDBConnectionString() string {
+	connString := os.Getenv("DB_CONN")
+	if connString != "" {
+		return connString
+	}
 	portStr := os.Getenv("port")
 	if portStr == "" {
 		portStr = testPortStr

@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   postgres:
     image: postgres:13
@@ -7,3 +9,28 @@ services:
       POSTGRES_PASSWORD: test
     ports:
       - "5432:5432"
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    environment:
+      - DB_CONN=host=database port=5435 user=postgres password=postgres dbname=test sslmode=disable
+      - HTTP_PORT=8080
+      - HTTP_HOST=0.0.0.0
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    networks:
+      - default
+
+  database:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: test
+    ports:
+      - "5435:5435"
