@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"homework-3/internal/utils"
 	"strings"
 	"sync"
 	"testing"
@@ -18,7 +19,10 @@ type TestDB struct {
 
 // NewFromEnv returns an instance of TestDB
 func NewFromEnv() *TestDB {
-	database, err := db.NewDB(context.Background(), db.GetDBConnectionString()) // тут должен передавать креды для тестовой бд
+	config := utils.GetEnvDBConnectionConfig()
+	config.Host = "localhost"
+
+	database, err := db.NewDB(context.Background(), utils.MakeDBConnStr(config))
 	if err != nil {
 		panic(err)
 	}
