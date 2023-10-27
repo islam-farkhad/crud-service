@@ -5,7 +5,7 @@ package tests
 import (
 	"encoding/json"
 	"fmt"
-	"homework-3/internal/crud"
+	"homework-3/internal/handlers"
 	"homework-3/internal/utils"
 	"homework-3/tests/states"
 	"net/http"
@@ -38,7 +38,7 @@ func Test_ReadPost(t *testing.T) {
 		//act
 		testApp.Router.ServeHTTP(rr, req)
 
-		response := &crud.GetPostByIDResponse{}
+		response := &handlers.GetPostByIDResponse{}
 		err := json.Unmarshal(rr.Body.Bytes(), response)
 		if err != nil {
 			panic(err)

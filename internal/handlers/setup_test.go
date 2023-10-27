@@ -1,4 +1,4 @@
-package crud
+package handlers
 
 import (
 	mockrepository "homework-3/internal/pkg/repository/mocks"
