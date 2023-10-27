@@ -1,23 +1,21 @@
 version: "3.8"
 
 services:
-  postgres:
-    image: postgres:13
-    environment:
-      POSTGRES_DB: test
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: test
-    ports:
-      - "5432:5432"
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: posts-service:1.0
+    command: ./homework-5
 
     environment:
-      - DB_CONN=host=database port=5435 user=postgres password=postgres dbname=test sslmode=disable
-      - HTTP_PORT=8080
-      - HTTP_HOST=0.0.0.0
+      - HOST=${HOST}
+      - PORT=${PORT}
+      - USER=${USER}
+      - PASSWORD=${PASSWORD}
+      - DBNAME=${DBNAME}
+
+      - HTTP_HOST=${HTTP_HOST}
+      - HTTP_PORT=${HTTP_PORT}
+
+
     ports:
       - "8080:8080"
     depends_on:
@@ -33,4 +31,4 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_DB: test
     ports:
-      - "5435:5435"
+      - "5432:5432"
