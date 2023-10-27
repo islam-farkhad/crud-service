@@ -1,7 +1,7 @@
 package app
 
 import (
-	"homework-3/internal/crud"
+	"homework-3/internal/handlers"
 	"homework-3/internal/pkg/db"
 	"homework-3/internal/pkg/repository/postgresql"
 	"net/http"
@@ -10,8 +10,8 @@ import (
 )
 
 // NewTestApp creates test app with prefix /test in all routes
-func NewTestApp(database db.DBops) crud.App {
-	testApp := crud.NewApp(mux.NewRouter(), postgresql.NewRepo(database), "/test")
+func NewTestApp(database db.DBops) handlers.App {
+	testApp := handlers.NewApp(mux.NewRouter(), postgresql.NewRepo(database), "/test")
 	http.Handle("/", testApp.Router)
 	return testApp
 }

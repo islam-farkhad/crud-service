@@ -1,4 +1,4 @@
-package crud
+package handlers
 
 import (
 	"context"
@@ -19,9 +19,9 @@ func (app *App) CreateComment(ctx context.Context, comment *repository.Comment) 
 	}
 
 	comment.ID = commentID
-	commentJSON, _ := json.Marshal(comment)
+	commentJSON, err := json.Marshal(comment)
 	if err != nil {
-		return []byte(fmt.Sprintf("can not marshal comment. comment.PostID: %d, comment.Content: %s, err: %v", comment.PostID, comment.Content, err)), http.StatusInternalServerError
+		return []byte(fmt.Sprintf("can not marshal comment. err: %v", err)), http.StatusInternalServerError
 	}
 
 	return commentJSON, http.StatusOK
@@ -53,8 +53,8 @@ func (app *App) HandleCreateComment(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	postID, ok := utils.GetIDFromQueryParams(req)
-	if !ok {
+	postID, status := utils.RetrieveID(req)
+	if status != http.StatusOK {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}

@@ -1,4 +1,4 @@
-package crud
+package handlers
 
 import (
 	"context"
@@ -19,7 +19,10 @@ func (app *App) CreatePost(ctx context.Context, postRepo *repository.Post) ([]by
 	}
 	postRepo.ID = id
 
-	postJSON, _ := json.Marshal(postRepo)
+	postJSON, err := json.Marshal(postRepo)
+	if err != nil {
+		return []byte(fmt.Sprintf("could not marshal postRepo. err: %v", err)), http.StatusInternalServerError
+	}
 
 	return postJSON, http.StatusOK
 }
@@ -59,7 +62,7 @@ func (app *App) HandleCreatePost(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(status)
 	_, err := w.Write(data)
 	if err != nil {
-		log.Println(err.Error())
+		log.Printf("%+v", err)
 		return
 	}
 }

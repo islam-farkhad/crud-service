@@ -1,4 +1,4 @@
-package crud
+package handlers
 
 import (
 	"context"
@@ -26,7 +26,7 @@ func (app *App) UpdatePost(ctx context.Context, postRepo *repository.Post) ([]by
 
 	postJSON, err := json.Marshal(postRepo)
 	if err != nil {
-		return []byte(fmt.Sprintf("can not marshal Post. postRepo.Content: %s, postRepo.Likes: %d, err: %v", postRepo.Content, postRepo.Likes, err)), http.StatusInternalServerError
+		return []byte(fmt.Sprintf("can not marshal postRepo.  err: %v", err)), http.StatusInternalServerError
 
 	}
 

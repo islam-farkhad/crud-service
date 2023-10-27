@@ -1,4 +1,4 @@
-package crud
+package handlers
 
 import "homework-3/internal/pkg/repository"
 
