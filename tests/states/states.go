@@ -2,7 +2,7 @@ package states
 
 import "time"
 
-// General posts fields for testing
+// crud-serviceeral posts fields for testing
 const (
 	Post1ID = int64(500001)
 	Post2ID = int64(500002)
@@ -14,10 +14,10 @@ const (
 	Post2Likes = int64(20)
 )
 
-// Post1CreatedAt General CreatedAt of post for testing
+// Post1CreatedAt crud-serviceeral CreatedAt of post for testing
 var Post1CreatedAt = time.Date(1999, 8, 25, 14, 10, 7, 0, time.UTC)
 
-// General comment fields for testing
+// crud-serviceeral comment fields for testing
 const (
 	Comment1ID = int64(7001)
 	Comment2ID = int64(7002)

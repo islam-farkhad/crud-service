@@ -8,7 +8,7 @@ COPY . .
 RUN apk add --no-cache ca-certificates && update-ca-certificates
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux go build -o crud-service cmd/posts_service/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o crud-service cmd/crud_service/main.go
 
 EXPOSE 8080
 
