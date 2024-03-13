@@ -8,23 +8,19 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"homework-3/internal/crud"
-	"homework-3/internal/pkg/db"
-	"homework-3/internal/pkg/repository/postgresql"
-	"homework-3/internal/utils"
+	"crud-service/internal/handlers"
+	"crud-service/internal/pkg/repository/postgresql"
+	"crud-service/internal/utils"
 )
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	database, err := db.NewDB(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
+	database := utils.ConnectDB(ctx)
 	defer database.GetConnectionsPool(ctx).Close()
 
-	app := crud.NewApp(mux.NewRouter(), postgresql.NewRepo(database))
+	app := handlers.NewApp(mux.NewRouter(), postgresql.NewRepo(database), "")
 
 	http.Handle("/", app.Router)
 

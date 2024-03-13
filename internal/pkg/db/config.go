@@ -2,9 +2,10 @@ package db
 
 // Config is used to connect to database
 type Config struct {
-	Addr     string
-	Port     int
+	Host     string
+	Port     string
 	User     string
 	Password string
 	DBName   string
+	SSLMode  string
 }
