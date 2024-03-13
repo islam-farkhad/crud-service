@@ -3,11 +3,11 @@
 package tests
 
 import (
+	"crud-service/internal/handlers"
+	"crud-service/internal/utils"
+	"crud-service/tests/states"
 	"encoding/json"
 	"fmt"
-	"homework-3/internal/handlers"
-	"homework-3/internal/utils"
-	"homework-3/tests/states"
 	"net/http"
 	"testing"
 

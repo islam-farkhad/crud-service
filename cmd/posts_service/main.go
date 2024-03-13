@@ -8,9 +8,9 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"homework-3/internal/handlers"
-	"homework-3/internal/pkg/repository/postgresql"
-	"homework-3/internal/utils"
+	"crud-service/internal/handlers"
+	"crud-service/internal/pkg/repository/postgresql"
+	"crud-service/internal/utils"
 )
 
 func main() {

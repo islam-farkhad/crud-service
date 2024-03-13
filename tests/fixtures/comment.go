@@ -1,8 +1,8 @@
 package fixtures
 
 import (
-	"homework-3/internal/pkg/repository"
-	"homework-3/tests/states"
+	"crud-service/internal/pkg/repository"
+	"crud-service/tests/states"
 	"time"
 )
 

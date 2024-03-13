@@ -3,9 +3,9 @@
 package tests
 
 import (
+	"crud-service/internal/utils"
+	"crud-service/tests/states"
 	"fmt"
-	"homework-3/internal/utils"
-	"homework-3/tests/states"
 	"net/http"
 	"testing"
 

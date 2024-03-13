@@ -1,6 +1,6 @@
 package handlers
 
-import "homework-3/internal/pkg/repository"
+import "crud-service/internal/pkg/repository"
 
 type addPostRequest struct {
 	Content string `json:"content"`

@@ -2,11 +2,11 @@ package handlers
 
 import (
 	"context"
+	"crud-service/internal/pkg/repository"
+	"crud-service/tests/fixtures"
+	"crud-service/tests/states"
 	"encoding/json"
 	"fmt"
-	"homework-3/internal/pkg/repository"
-	"homework-3/tests/fixtures"
-	"homework-3/tests/states"
 	"net/http"
 	"testing"
 

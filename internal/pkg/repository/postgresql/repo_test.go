@@ -2,7 +2,7 @@ package postgresql
 
 import (
 	"context"
-	"homework-3/internal/pkg/repository"
+	"crud-service/internal/pkg/repository"
 	"testing"
 
 	"github.com/golang/mock/gomock"

@@ -1,12 +1,12 @@
 package tests
 
 import (
+	"crud-service/internal/handlers"
+	"crud-service/internal/pkg/repository"
+	"crud-service/internal/utils"
+	"crud-service/tests/states"
 	"encoding/json"
 	"fmt"
-	"homework-3/internal/handlers"
-	"homework-3/internal/pkg/repository"
-	"homework-3/internal/utils"
-	"homework-3/tests/states"
 )
 
 // AddPostToTestDB adds a valid post to test db

@@ -1,4 +1,4 @@
-module homework-3
+module crud-service
 
 go 1.19
 

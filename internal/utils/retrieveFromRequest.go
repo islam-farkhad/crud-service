@@ -1,11 +1,12 @@
 package utils
 
 import (
-	"github.com/gorilla/mux"
 	"io"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 // RetrieveBody reads body from request and returns it.

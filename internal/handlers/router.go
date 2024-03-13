@@ -1,9 +1,9 @@
 package handlers
 
 import (
+	"crud-service/internal/pkg/repository"
+	"crud-service/internal/pkg/repository/postgresql"
 	"fmt"
-	"homework-3/internal/pkg/repository"
-	"homework-3/internal/pkg/repository/postgresql"
 
 	"github.com/gorilla/mux"
 )

@@ -2,13 +2,13 @@ package postgres
 
 import (
 	"context"
+	"crud-service/internal/utils"
 	"fmt"
-	"homework-3/internal/utils"
 	"strings"
 	"sync"
 	"testing"
 
-	"homework-3/internal/pkg/db"
+	"crud-service/internal/pkg/db"
 )
 
 // TestDB represents database for testing

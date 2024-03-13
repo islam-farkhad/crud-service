@@ -6,7 +6,7 @@ package mock_repository
 
 import (
 	context "context"
-	repository "homework-3/internal/pkg/repository"
+	repository "crud-service/internal/pkg/repository"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"

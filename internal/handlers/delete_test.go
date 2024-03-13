@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"context"
+	"crud-service/internal/pkg/repository"
+	"crud-service/tests/states"
 	"fmt"
-	"homework-3/internal/pkg/repository"
-	"homework-3/tests/states"
 	"net/http"
 	"testing"
 

@@ -2,10 +2,10 @@ package handlers
 
 import (
 	"context"
+	"crud-service/internal/pkg/repository"
+	"crud-service/internal/utils"
 	"encoding/json"
 	"fmt"
-	"homework-3/internal/pkg/repository"
-	"homework-3/internal/utils"
 	"log"
 	"net/http"
 )

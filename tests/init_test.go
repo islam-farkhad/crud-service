@@ -3,9 +3,9 @@
 package tests
 
 import (
-	"homework-3/internal/handlers"
-	"homework-3/tests/app"
-	"homework-3/tests/postgres"
+	"crud-service/internal/handlers"
+	"crud-service/tests/app"
+	"crud-service/tests/postgres"
 )
 
 var (

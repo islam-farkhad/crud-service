@@ -8,8 +8,8 @@ import (
 
 	"github.com/jackc/pgx/v4"
 
-	"homework-3/internal/pkg/db"
-	"homework-3/internal/pkg/repository"
+	"crud-service/internal/pkg/db"
+	"crud-service/internal/pkg/repository"
 )
 
 // Repo is a struct representing the PostgreSQL repository for handling Post and Comment entities.

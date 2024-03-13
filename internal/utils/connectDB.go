@@ -2,8 +2,8 @@ package utils
 
 import (
 	"context"
+	"crud-service/internal/pkg/db"
 	"fmt"
-	"homework-3/internal/pkg/db"
 	"log"
 )
 
@@ -16,6 +16,7 @@ func ConnectDB(ctx context.Context) *db.Database {
 	return database
 }
 
+// MakeDBConnStr construct db connection string based on passed db.Config instance
 func MakeDBConnStr(config *db.Config) string {
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", config.Host, config.Port, config.User, config.Password, config.DBName, config.SSLMode)
 }

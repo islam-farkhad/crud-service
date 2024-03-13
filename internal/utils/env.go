@@ -1,12 +1,13 @@
 package utils
 
 import (
+	"crud-service/internal/pkg/db"
 	"fmt"
-	"github.com/joho/godotenv"
-	"homework-3/internal/pkg/db"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/joho/godotenv"
 )
 
 func findEnvFile() (string, error) {
@@ -53,6 +54,7 @@ func GetAPIPort() string {
 	return ":" + apiPort
 }
 
+// GetEnvDBConnectionConfig builds db.Config instance based on environment variables
 func GetEnvDBConnectionConfig() *db.Config {
 	return &db.Config{
 		Host:     os.Getenv("HOST"),

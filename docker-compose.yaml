@@ -3,7 +3,7 @@ version: "3.8"
 services:
   app:
     image: posts-service:1.0
-    command: ./homework-5
+    command: ./crud-service
 
     environment:
       - HOST=${HOST}

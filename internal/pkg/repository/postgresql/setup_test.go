@@ -3,8 +3,8 @@ package postgresql
 import (
 	"testing"
 
-	mockdatabase "homework-3/internal/pkg/db/mocks"
-	"homework-3/internal/pkg/repository"
+	mockdatabase "crud-service/internal/pkg/db/mocks"
+	"crud-service/internal/pkg/repository"
 
 	"github.com/golang/mock/gomock"
 )

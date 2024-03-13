@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	mockrepository "homework-3/internal/pkg/repository/mocks"
+	mockrepository "crud-service/internal/pkg/repository/mocks"
 	"testing"
 
 	"github.com/golang/mock/gomock"

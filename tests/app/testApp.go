@@ -1,9 +1,9 @@
 package app
 
 import (
-	"homework-3/internal/handlers"
-	"homework-3/internal/pkg/db"
-	"homework-3/internal/pkg/repository/postgresql"
+	"crud-service/internal/handlers"
+	"crud-service/internal/pkg/db"
+	"crud-service/internal/pkg/repository/postgresql"
 	"net/http"
 
 	"github.com/gorilla/mux"
